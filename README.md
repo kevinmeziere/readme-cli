@@ -23,6 +23,12 @@ cd ~/readme-get/project-fifo/
 diff -qr v0.7.1 v0.7.2
 ```
 
+##Hint
+By clicking the gear (upper right) and then "Switch to raw mode" you can paste
+the contents of any downloaded file. This makes it easy to copy pages to a newer
+version.
+
+
 ##Known issues
 Currently only tested on two column theme. Because readme-get is just scraping
 the generated html it may break on other layouts. Another side affect of this is
