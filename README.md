@@ -22,3 +22,8 @@ python setup.py install
 cd ~/readme-get/project-fifo/
 diff -qr v0.7.1 v0.7.2
 ```
+
+##Known issues
+Currently only tested on two column theme. Because readme-get is just scraping
+the generated html it may break on other layouts. Another side affect of this is
+that if the page layout changes the script may not find the right divs/classes/ect.
