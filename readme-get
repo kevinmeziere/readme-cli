@@ -72,7 +72,7 @@ def main():
 	parser.add_argument('--target', default=os.path.expanduser("~") + "/readme-get/",
 											help="Directory for downloads. Defaults to ~/readme-get/")
 	parser.add_argument('--threads', default=8, help="The number of concurrent downloads. Default 8")
-	parser.add_argument('--progress', action='store_true', default=False, help="Show file names as they are downloaded")
+	#parser.add_argument('--progress', action='store_true', default=False, help="Show file names as they are downloaded")
 	#parser.add_argument('--version', '-V', action='version', version='%(prog)s 0.1.0')
 
 	args = parser.parse_args(sys.argv[1:])
@@ -84,9 +84,7 @@ def main():
 	else:
 		target = args.target + "/" + project + "/"
 	threads = int(args.threads)
-	progress =  args.progress
-
-	print target
+	#progress =  args.progress
 
 	clean_version(target, version)
 	download_project(project, version, target, threads)
