@@ -9,6 +9,12 @@ This tool downloads a whole project so you can use typical tools to see differen
 Currently there is not a published API, so this is strictly a readonly tool. If
 an API becomes advailable in the future sync may be a posibility.
 
+##Installation
+```
+git clone https://github.com/kevinmeziere/readme-cli.git
+python setup.py install
+```
+
 ##Sample Usage
 ```
 ./readme-get project-fifo v0.7.1 --threads 16
