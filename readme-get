@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+from bs4 import BeautifulSoup
+from multiprocessing.pool import Pool
+import os
+import sys
+import errno
+import shutil
+import argparse
+import requests
+
+
+
+def make_sure_path_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
+
+def doc_md(url):
+	print url
+	page = requests.get(url)
+	tree = BeautifulSoup(page.content, "html.parser")
+	content = tree.find("content", { "class" : "content" })
+	return content.string
+
+def write_doc_md(url, dest):
+	path, _file = os.path.split(dest)
+	make_sure_path_exists(path)
+	f = open(dest, 'w')
+	f.write(doc_md(url).encode('utf8'))
+	f.close()
+
+def write_doc_md_wrapper(args):
+   return write_doc_md(*args)
+
+
+def download_project(project, version, target, threads):
+	baseurl = 'https://' + project + '.readme.io/' + version
+	print "Downloading...\n" + baseurl
+
+	mainpage = requests.get(baseurl)
+	tree = BeautifulSoup(mainpage.content, "html.parser")
+	sidebar = tree.find("div", { "class" : "sidebar-nav" })
+
+	work_objects = []
+
+	for menu_section in sidebar("h4"):
+		sname = menu_section.string
+		for schild in menu_section.next_sibling("a"):
+				# filter out external pages (api docs)
+				if schild.has_attr("target") and schild["target"] == "_blank":
+					continue
+				schild_url = 'https://' + project + '.readme.io' + schild["href"]
+				dest = target + version + "/"  + sname + "/" + schild.string + ".md"
+				work_objects.append((schild_url, dest))
+
+	pool = Pool(threads)
+	pool.map(write_doc_md_wrapper, work_objects)
+
+
+def clean_version(target, version):
+	if os.path.exists(target + version):
+		shutil.rmtree(target + version)
+
+def main():
+	parser = argparse.ArgumentParser(description='Readme.io project getter')
+	parser.add_argument('project', help="The document project to download")
+	parser.add_argument('version',  help="The document version to download")
+	parser.add_argument('--target', default=os.path.expanduser("~") + "/readme-get/",
+											help="Directory for downloads. Defaults to ~/readme-get/")
+	parser.add_argument('--threads', default=8, help="The number of concurrent downloads. Default 8")
+	parser.add_argument('--progress', action='store_true', default=False, help="Show file names as they are downloaded")
+	#parser.add_argument('--version', '-V', action='version', version='%(prog)s 0.1.0')
+
+	args = parser.parse_args(sys.argv[1:])
+
+	project = args.project
+	version = args.version
+	if args.target.endswith("/"):
+		target = args.target + project + "/"
+	else:
+		target = args.target + "/" + project + "/"
+	threads = int(args.threads)
+	progress =  args.progress
+
+	print target
+
+	clean_version(target, version)
+	download_project(project, version, target, threads)
+
+main()
